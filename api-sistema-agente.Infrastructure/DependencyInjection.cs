@@ -28,6 +28,12 @@ public static class DependencyInjection
     var serviceProvider = services.BuildServiceProvider();
     var secretsOptions = serviceProvider.GetRequiredService<IOptions<SecretsApi>>().Value;
 
+    services.AddDbContext<DatabaseContext>(
+      options => options.UseSqlServer(
+        secretsOptions.ConnectionString
+      )
+    );
+
     services.AddAuthentication(x =>
     {
       x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
