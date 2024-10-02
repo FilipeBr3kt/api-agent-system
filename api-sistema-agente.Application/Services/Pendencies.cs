@@ -19,7 +19,7 @@ public class PendenciesService : IPendenciesService
     _validator = new PendencieValidator();
   }
 
-  public async Task<IResult> Create(PendenciesViewModel model)
+  public async Task<IResult> Create(PendenciesViewModel model, CancellationToken token)
   {
     var validationResult = _validator.Validate(model);
 
@@ -42,23 +42,23 @@ public class PendenciesService : IPendenciesService
       DateRegister = BitConverter.GetBytes(DateTime.UtcNow.Ticks),
     };
 
-    await _repository.Create(pendencie);
+    await _repository.Create(pendencie, token);
     return Results.Created("", pendencie);
   }
 
-  public async Task<IResult> GetAll(string? searchTerm, int take, int skip)
+  public async Task<IResult> GetAll(string? searchTerm, int take, int skip, CancellationToken token)
   {
 
-    IEnumerable<Pendencie> pendencies = await _repository.GetAll(searchTerm, take, skip);
+    IEnumerable<Pendencie> pendencies = await _repository.GetAll(searchTerm, take, skip, token);
 
     if (!pendencies.Any()) return Results.NotFound();
 
     return Results.Ok(pendencies);
   }
 
-  public async Task<IResult> GetById(int id)
+  public async Task<IResult> GetById(int id, CancellationToken token)
   {
-    Pendencie? pendencie = await _repository.GetById(id);
+    Pendencie? pendencie = await _repository.GetById(id, token);
 
     if (pendencie is null) return Results.NotFound();
 

@@ -14,16 +14,16 @@ public class AuthRepository : IAuthRepository
     _context = context;
   }
 
-  public async Task<Auth> CreateUser(Auth user)
+  public async Task<Auth> CreateUser(Auth user, CancellationToken token)
   {
-    _context.Auth.Add(user);
-    await _context.SaveChangesAsync();
+    await _context.Auth.AddAsync(user, token);
+    await _context.SaveChangesAsync(token);
     return user;
   }
 
-  public async Task<Auth?> FindUserByMail(string mail)
+  public async Task<Auth?> FindUserByMail(string mail, CancellationToken token)
   {
-    Auth? user = await _context.Auth.FirstOrDefaultAsync(p => p.Mail == mail);
+    Auth? user = await _context.Auth.FirstOrDefaultAsync(p => p.Mail == mail, token);
 
     if (user != null)
     {
@@ -33,9 +33,9 @@ public class AuthRepository : IAuthRepository
     return null;
   }
 
-  public async Task<Auth?> FindUserByName(string name)
+  public async Task<Auth?> FindUserByName(string name, CancellationToken token)
   {
-    Auth? user = await _context.Auth.FirstOrDefaultAsync(p => p.Login == name);
+    Auth? user = await _context.Auth.FirstOrDefaultAsync(p => p.Login == name, token);
 
     if (user != null)
     {

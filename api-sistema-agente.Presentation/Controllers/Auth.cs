@@ -26,9 +26,16 @@ public class AuthController : ControllerBase, IAuthController
 
   [HttpPost("login")]
   [AllowAnonymous]
-  public async Task<IResult> Login(AuthLoginViewModel model)
+  public async Task<IResult> Login(AuthLoginViewModel model, CancellationToken token)
   {
-    return await _service.Login(model);
+    try
+    {
+      return await _service.Login(model, token);
+    }
+    catch (Exception ex)
+    {
+      return Results.BadRequest(ex.Message);
+    }
   }
 
   [HttpGet("refresh-token")]
@@ -40,15 +47,15 @@ public class AuthController : ControllerBase, IAuthController
 
   [HttpPost("register")]
   [AllowAnonymous]
-  public async Task<IResult> Register(AuthRegisterViewModel model)
+  public async Task<IResult> Register(AuthRegisterViewModel model, CancellationToken token)
   {
-    return await _service.Register(model);
+    return await _service.Register(model, token);
   }
 
   [HttpPost("reset-password")]
   [AllowAnonymous]
-  public async Task<IResult> ResetPassword(AuthResetPasswordViewModel model)
+  public async Task<IResult> ResetPassword(AuthResetPasswordViewModel model, CancellationToken token)
   {
-    return await _service.ResetPassword(model);
+    return await _service.ResetPassword(model, token);
   }
 }

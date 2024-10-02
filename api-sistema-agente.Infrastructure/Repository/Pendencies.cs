@@ -13,14 +13,14 @@ public class PendenciesRepository : IPendenciesRepository
   {
     _context = context;
   }
-  public async Task<Pendencie> Create(Pendencie pendencie)
+  public async Task<Pendencie> Create(Pendencie pendencie, CancellationToken token)
   {
-    await _context.Pendencias.AddAsync(pendencie);
-    await _context.SaveChangesAsync();
+    await _context.Pendencias.AddAsync(pendencie, token);
+    await _context.SaveChangesAsync(token);
     return pendencie;
   }
 
-  public async Task<IEnumerable<Pendencie>> GetAll(string? searchTerm, int take, int skip)
+  public async Task<IEnumerable<Pendencie>> GetAll(string? searchTerm, int take, int skip, CancellationToken token)
   {
     if (!string.IsNullOrWhiteSpace(searchTerm))
     {
@@ -31,16 +31,16 @@ public class PendenciesRepository : IPendenciesRepository
           )
           .Take(take)
           .Skip(skip)
-          .ToListAsync();
+          .ToListAsync(token);
     }
 
     return await _context.Pendencias
       .Take(take)
       .Skip(skip)
-      .ToListAsync();
+      .ToListAsync(token);
   }
 
-  public async Task<Pendencie?> GetById(int id)
+  public async Task<Pendencie?> GetById(int id, CancellationToken token)
   {
     return await _context.Pendencias.FindAsync(id);
   }

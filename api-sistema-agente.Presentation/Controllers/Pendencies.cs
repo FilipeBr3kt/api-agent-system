@@ -19,24 +19,23 @@ public class PendenciesController : ControllerBase, IPendenciesController
 
   [HttpGet()]
   [Authorize]
-  public async Task<IResult> GetPendencies(string? searchTerm, int take = 10, int skip = 0)
+  public async Task<IResult> GetPendencies(CancellationToken token, string? searchTerm, int take = 10, int skip = 0)
   {
-
-    return await _service.GetAll(searchTerm, take, skip);
+    return await _service.GetAll(searchTerm, take, skip, token);
   }
 
   [HttpGet("{id}")]
   [Authorize]
-  public async Task<IResult> GetPendenciesById(int id)
+  public async Task<IResult> GetPendenciesById(int id, CancellationToken token)
   {
-    return await _service.GetById(id);
+    return await _service.GetById(id, token);
   }
 
   [HttpPost()]
   [Authorize]
-  public async Task<IResult> CreatePendencies(PendenciesViewModel model)
+  public async Task<IResult> CreatePendencies(PendenciesViewModel model, CancellationToken token)
   {
-    return await _service.Create(model);
+    return await _service.Create(model, token);
   }
 
 }

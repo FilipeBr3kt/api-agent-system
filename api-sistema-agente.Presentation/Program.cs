@@ -15,8 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services
         .AddApplication()
         .AddPresentation()
-        .AddInfrastructure(builder.Configuration);
-    builder.Services.AddControllers();
+        .AddInfrastructure(builder.Configuration)
+        .AddControllers();
 }
 
 {

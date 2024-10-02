@@ -23,7 +23,7 @@ public class AuthServices : IAuthServices
     _mailService = mailService;
   }
 
-  public async Task<IResult> Login(AuthLoginViewModel model)
+  public async Task<IResult> Login(AuthLoginViewModel model, CancellationToken cancellationToken)
   {
     var validator = new AuthLoginValidator();
     var resultValidator = validator.Validate(model);
@@ -34,7 +34,7 @@ public class AuthServices : IAuthServices
       return Results.BadRequest(new { message = errors });
     }
 
-    Auth? user = await _repository.FindUserByName(model.Login!);
+    Auth? user = await _repository.FindUserByName(model.Login!, cancellationToken);
 
     if (user == null)
     {
@@ -90,7 +90,7 @@ public class AuthServices : IAuthServices
     });
   }
 
-  public async Task<IResult> ResetPassword(AuthResetPasswordViewModel model)
+  public async Task<IResult> ResetPassword(AuthResetPasswordViewModel model, CancellationToken token)
   {
     var validator = new AuthResetPasswordValidator();
     var resultValidator = validator.Validate(model);
@@ -101,7 +101,7 @@ public class AuthServices : IAuthServices
       return Results.BadRequest(new { message = errors });
     }
 
-    var user = await _repository.FindUserByMail(model.Mail!);
+    var user = await _repository.FindUserByMail(model.Mail!, token);
     if (user == null)
     {
       return Results.BadRequest(new { message = "This mail does not exist" });
@@ -113,7 +113,7 @@ public class AuthServices : IAuthServices
     return Results.Ok(new { message = "The email was sent successfully" });
   }
 
-  public async Task<IResult> Register(AuthRegisterViewModel model)
+  public async Task<IResult> Register(AuthRegisterViewModel model, CancellationToken token)
   {
     var validator = new AuthRegisterValidator();
     var resultValidator = validator.Validate(model);
@@ -124,13 +124,13 @@ public class AuthServices : IAuthServices
       return Results.BadRequest(new { message = errors });
     }
 
-    var existsUser = await _repository.FindUserByName(model.Login!);
+    var existsUser = await _repository.FindUserByName(model.Login!, token);
     if (existsUser != null)
     {
       return Results.BadRequest(new { message = "This username already exists" });
     }
 
-    var existsMail = await _repository.FindUserByMail(model.Mail!);
+    var existsMail = await _repository.FindUserByMail(model.Mail!, token);
     if (existsMail != null)
     {
       return Results.BadRequest(new { message = "This mail already exists" });
@@ -144,7 +144,7 @@ public class AuthServices : IAuthServices
       Mail = model.Mail,
     };
 
-    var user = await _repository.CreateUser(registerUser);
+    var user = await _repository.CreateUser(registerUser, token);
     return Results.Ok(user);
   }
 }

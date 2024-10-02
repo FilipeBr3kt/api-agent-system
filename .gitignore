@@ -37,3 +37,7 @@ Migrations/
 .idea/
 .run/
 *.sln.iml
+
+.env.development.json
+.env.production.json
+.env.staging.json
