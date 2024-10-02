@@ -18,6 +18,7 @@ public static class DependencyInjection
 {
   public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
   {
+
     services.AddScoped<IMailService, MailService>();
     services.AddScoped<ITokenService, TokenService>();
     services.AddScoped<IPasswordEncryption, PasswordEncryption>();
@@ -52,6 +53,7 @@ public static class DependencyInjection
       };
     });
 
+    services.AddScoped<IPendenciesRepository, PendenciesRepository>();
     services.AddScoped<IAuthRepository, AuthRepository>();
     return services;
   }
