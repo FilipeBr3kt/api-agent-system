@@ -1,0 +1,39 @@
+# Compiled object files
+*.o
+*.obj
+*.dll
+*.exe
+*.pdb
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Visual Studio workspace and local history
+.vs/
+.vscode/
+.history/
+
+# Build directories
+bin/
+obj/
+
+# Logs and crash reports
+*.log
+*.tlg
+*.ide.log
+
+# Entity Framework Migrations
+Migrations/
+
+# Rider specific files
+.idea/
+.run/
+*.sln.iml
