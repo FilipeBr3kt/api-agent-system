@@ -7,6 +7,7 @@ public static class DependencyInjection
 {
   public static IServiceCollection AddPresentation(this IServiceCollection services)
   {
+    services.AddScoped<IPendenciesController, PendenciesController>();
     services.AddScoped<IAuthController, AuthController>();
     return services;
   }
