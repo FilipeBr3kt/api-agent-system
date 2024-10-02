@@ -1,3 +1,23 @@
+using System.Text;
+using api_sistema_agente.Domain.Repositories;
+using api_sistema_agente.Infrastructure.Config;
+using api_sistema_agente.Infrastructure.Constants;
+using api_sistema_agente.Infrastructure.Repository;
+using api_sistema_agente.Infrastructure.Services.Interface;
+using api_sistema_agente.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+
+namespace api_sistema_agente.Domain;
+
+public static class DependencyInjection
+{
+  public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+  {
     services.AddScoped<IMailService, MailService>();
     services.AddScoped<ITokenService, TokenService>();
     services.AddScoped<IPasswordEncryption, PasswordEncryption>();
