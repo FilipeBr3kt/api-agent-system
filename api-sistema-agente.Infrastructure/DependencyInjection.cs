@@ -25,3 +25,8 @@
         ValidateAudience = false
       };
     });
+
+    services.AddScoped<IAuthRepository, AuthRepository>();
+    return services;
+  }
+}
