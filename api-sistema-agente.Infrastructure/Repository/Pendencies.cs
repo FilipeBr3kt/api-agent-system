@@ -13,7 +13,7 @@ public class PendenciesRepository : IPendenciesRepository
   {
     _context = context;
   }
-  public async Task<Pendencie> Create(Pendencie pendencie, CancellationToken token)
+  public async Task<Pendencie> Save(Pendencie pendencie, CancellationToken token)
   {
     await _context.Pendencias.AddAsync(pendencie, token);
     await _context.SaveChangesAsync(token);

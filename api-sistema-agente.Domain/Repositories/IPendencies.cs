@@ -6,5 +6,5 @@ public interface IPendenciesRepository
 {
   Task<IEnumerable<Pendencie>> GetAll(string? searchTerm, int take, int skip, CancellationToken token);
   Task<Pendencie?> GetById(int id, CancellationToken token);
-  Task<Pendencie> Create(Pendencie pendencie, CancellationToken token);
+  Task<Pendencie> Save(Pendencie pendencie, CancellationToken token);
 }

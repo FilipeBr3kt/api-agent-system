@@ -14,7 +14,7 @@ public class AuthRepository : IAuthRepository
     _context = context;
   }
 
-  public async Task<Auth> CreateUser(Auth user, CancellationToken token)
+  public async Task<Auth> SaveUser(Auth user, CancellationToken token)
   {
     await _context.Auth.AddAsync(user, token);
     await _context.SaveChangesAsync(token);
