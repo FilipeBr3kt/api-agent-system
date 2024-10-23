@@ -1,6 +1,7 @@
 using api_sistema_agente.Application;
 using api_sistema_agente.Domain;
 using api_sistema_agente.Presentation;
+using api_sistema_agente.Presentation.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -31,6 +32,7 @@ var builder = WebApplication.CreateBuilder(args);
     app.MapControllers();
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseHttpsRedirection();
     app.Run();
 }
