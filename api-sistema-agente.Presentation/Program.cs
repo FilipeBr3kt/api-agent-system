@@ -10,8 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddUserSecrets<Program>();
     }
 
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services
+        .AddEndpointsApiExplorer()
+        .AddSwaggerGen()
+        .AddProblemDetails()
+        .AddExceptionHandler<ExceptionToProblemDetailsHandler>();
 
     builder.Services
         .AddApplication()
@@ -32,7 +35,7 @@ var builder = WebApplication.CreateBuilder(args);
     app.MapControllers();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseMiddleware<ExceptionHandlingMiddleware>();
+    app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.Run();
 }
