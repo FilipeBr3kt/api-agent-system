@@ -3,6 +3,7 @@ using api_sistema_agente.Domain.ViewModel;
 using api_sistema_agente.Presentation.Controllers.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using api_sistema_agente.Domain.Entities;
 
 namespace api_sistema_agente.Presentation.Controllers;
 
@@ -19,43 +20,39 @@ public class AuthController : ControllerBase, IAuthController
 
   [HttpPost("change-password")]
   [AllowAnonymous]
-  public Task<IResult> ChangePassword(AuthChangePasswordViewModel model, string? token)
+  public Task<IActionResult> ChangePassword(AuthChangePasswordViewModel model, string? token)
   {
     throw new NotImplementedException();
   }
 
   [HttpPost("login")]
   [AllowAnonymous]
-  public async Task<IResult> Login(AuthLoginViewModel model, CancellationToken token)
+  public async Task<IActionResult> Login(AuthLoginViewModel model, CancellationToken token)
   {
-    try
-    {
-      return await _service.Login(model, token);
-    }
-    catch (Exception ex)
-    {
-      return Results.BadRequest(ex.Message);
-    }
+    var user = new Auth(model.Login, model.Password);
+    return await _service.Login(user, token);
   }
 
   [HttpGet("refresh-token")]
   [Authorize]
-  public IResult RefreshToken()
+  public IActionResult RefreshToken()
   {
     return _service.RefreshToken(HttpContext);
   }
 
   [HttpPost("register")]
   [AllowAnonymous]
-  public async Task<IResult> Register(AuthRegisterViewModel model, CancellationToken token)
+  public async Task<IActionResult> Register(AuthRegisterViewModel model, CancellationToken token)
   {
-    return await _service.Register(model, token);
+    var user = new Auth(model.Login, model.Mail, model.Password);
+    return await _service.Register(user, token);
   }
 
   [HttpPost("reset-password")]
   [AllowAnonymous]
-  public async Task<IResult> ResetPassword(AuthResetPasswordViewModel model, CancellationToken token)
+  public async Task<IActionResult> ResetPassword(AuthResetPasswordViewModel model, CancellationToken token)
   {
-    return await _service.ResetPassword(model, token);
+    var user = new Auth(model.Mail, string.Empty);
+    return await _service.ResetPassword(user, token);
   }
 }

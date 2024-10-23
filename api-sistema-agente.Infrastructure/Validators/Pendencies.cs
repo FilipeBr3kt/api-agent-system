@@ -1,8 +1,8 @@
-using api_sistema_agente.Domain.ViewModel;
+using api_sistema_agente.Domain.Entities;
 using FluentValidation;
 
 namespace api_sistema_agente.Infrastructure.Validators;
-public class PendencieValidator : AbstractValidator<PendenciesViewModel>
+public class PendencieValidator : AbstractValidator<Pendencie>
 {
   public PendencieValidator()
   {

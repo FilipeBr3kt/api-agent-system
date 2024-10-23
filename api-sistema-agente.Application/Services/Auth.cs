@@ -1,10 +1,12 @@
 using api_sistema_agente.Application.Services.Interface;
 using api_sistema_agente.Domain.Entities;
+using api_sistema_agente.Domain.Exceptions;
 using api_sistema_agente.Domain.Repositories;
 using api_sistema_agente.Domain.ViewModel;
 using api_sistema_agente.Infrastructure.Services.Interface;
 using api_sistema_agente.Infrastructure.Validators;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api_sistema_agente.Application.Services;
 
@@ -12,139 +14,141 @@ public class AuthServices : IAuthServices
 {
   private readonly IAuthRepository _repository;
   private readonly ITokenService _tokenService;
-  private readonly IPasswordEncryption _passwordEncryption;
   private readonly IMailService _mailService;
 
-  public AuthServices(IAuthRepository repository, ITokenService tokenService, IPasswordEncryption passwordEncryption, IMailService mailService)
+  public AuthServices(IAuthRepository repository, ITokenService tokenService, IMailService mailService)
   {
     _repository = repository;
     _tokenService = tokenService;
-    _passwordEncryption = passwordEncryption;
     _mailService = mailService;
   }
 
-  public async Task<IResult> Login(AuthLoginViewModel model, CancellationToken cancellationToken)
+  public async Task<IActionResult> Login(Auth user, CancellationToken cancellationToken)
   {
     var validator = new AuthLoginValidator();
-    var resultValidator = validator.Validate(model);
+    var resultValidator = validator.Validate(user);
 
     if (!resultValidator.IsValid)
     {
       var errors = resultValidator.Errors.Select(x => x.ErrorMessage).ToList();
-      return Results.BadRequest(new { message = errors });
+      throw new ValidationException(errors);
     }
 
-    Auth? user = await _repository.FindUserByName(model.Login!, cancellationToken);
+    Auth? userExists = await _repository.FindUserByName(user.Login!, cancellationToken);
 
-    if (user == null)
+    if (userExists == null)
     {
-      return Results.BadRequest(new { message = "This username does not exist" });
+      throw new UserExistsException("This username does not exist");
     }
 
-    if (!_passwordEncryption.Verify(model.Password!, user.Password!))
+    if (!userExists.VerifyPassword(user.Password!))
     {
-      return Results.BadRequest(new
-      {
-        message = "Invalid password"
-      });
+      throw new InvalidPasswordException();
     }
 
     string token = _tokenService.GenerateToken<Auth>(user, null);
     string refreshToken = _tokenService.GenerateToken<Auth>(user, DateTime.UtcNow.AddDays(7));
 
-    return Results.Ok(new
+    var response = new { token, refreshToken };
+    return new OkObjectResult(new ApiResponse<object>
     {
-      token,
-      refreshToken
+      Success = true,
+      Data = response,
     });
   }
 
-  public Task<IResult> ChangePassword(AuthChangePasswordViewModel model)
+  public Task<IActionResult> ChangePassword(Auth user)
   {
     throw new NotImplementedException();
   }
 
-  public IResult RefreshToken(HttpContext httpContext)
+  public IActionResult RefreshToken(HttpContext httpContext)
   {
     var token = httpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
     if (string.IsNullOrEmpty(token))
     {
-      return Results.Unauthorized();
+      throw new UnauthorizedException("Token not found");
     }
 
     var decodedToken = _tokenService.DecodeToken<Auth>(token);
 
     if (decodedToken == null)
     {
-      return Results.Unauthorized();
+      throw new UnauthorizedException("Invalid token");
     }
 
     string newToken = _tokenService.GenerateToken<Auth>(decodedToken, null);
     string refreshToken = _tokenService.GenerateToken<Auth>(decodedToken, DateTime.UtcNow.AddDays(7));
 
-    return Results.Ok(new
+    var response = new { token = newToken, refreshToken };
+    return new OkObjectResult(new ApiResponse<object>
     {
-      token = newToken,
-      refreshToken
+      Success = true,
+      Data = response
     });
   }
 
-  public async Task<IResult> ResetPassword(AuthResetPasswordViewModel model, CancellationToken token)
+  public async Task<IActionResult> ResetPassword(Auth user, CancellationToken token)
   {
     var validator = new AuthResetPasswordValidator();
-    var resultValidator = validator.Validate(model);
+    var resultValidator = validator.Validate(user);
 
     if (!resultValidator.IsValid)
     {
       var errors = resultValidator.Errors.Select(x => x.ErrorMessage).ToList();
-      return Results.BadRequest(new { message = errors });
+      throw new ValidationException(errors);
     }
 
-    var user = await _repository.FindUserByMail(model.Mail!, token);
-    if (user == null)
+    var userExists = await _repository.FindUserByMail(user.Mail!, token);
+    if (userExists == null)
     {
-      return Results.BadRequest(new { message = "This mail does not exist" });
+      throw new UserExistsException("This mail does not exist");
     }
 
 
     _mailService.SendMail(user.Mail!, "Password Recovery", $"Hello {user.Login}");
 
-    return Results.Ok(new { message = "The email was sent successfully" });
+    return new OkObjectResult(new ApiResponse<object>
+    {
+      Success = true,
+      Data = new { Message = "The email was sent successfully" }
+    });
   }
 
-  public async Task<IResult> Register(AuthRegisterViewModel model, CancellationToken token)
+  public async Task<IActionResult> Register(Auth user, CancellationToken token)
   {
     var validator = new AuthRegisterValidator();
-    var resultValidator = validator.Validate(model);
+    var resultValidator = validator.Validate(user);
 
     if (!resultValidator.IsValid)
     {
       var errors = resultValidator.Errors.Select(x => x.ErrorMessage).ToList();
-      return Results.BadRequest(new { message = errors });
+      throw new ValidationException(errors);
     }
 
-    var existsUser = await _repository.FindUserByName(model.Login!, token);
+    var existsUser = await _repository.FindUserByName(user.Login!, token);
     if (existsUser != null)
     {
-      return Results.BadRequest(new { message = "This username already exists" });
+      throw new UserExistsException();
     }
 
-    var existsMail = await _repository.FindUserByMail(model.Mail!, token);
+    var existsMail = await _repository.FindUserByMail(user.Mail!, token);
     if (existsMail != null)
     {
-      return Results.BadRequest(new { message = "This mail already exists" });
+      throw new UserExistsException("This mail already exists");
     }
 
-    var encryptedPassword = _passwordEncryption.Hash(model.Password!);
-    Auth registerUser = new Auth
+    var assertUser = await _repository.SaveUser(user, token);
+    if (assertUser == null)
     {
-      Login = model.Login,
-      Password = encryptedPassword,
-      Mail = model.Mail,
-    };
+      throw new DatabaseSaveException();
+    }
 
-    var user = await _repository.CreateUser(registerUser, token);
-    return Results.Ok(user);
+    return new OkObjectResult(new ApiResponse<object>
+    {
+      Success = true,
+      Data = new { message = "User created successfully" }
+    });
   }
 }

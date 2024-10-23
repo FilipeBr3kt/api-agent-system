@@ -1,9 +1,10 @@
+using api_sistema_agente.Domain.Entities;
 using api_sistema_agente.Domain.ViewModel;
 using FluentValidation;
 
 namespace api_sistema_agente.Infrastructure.Validators;
 
-public class AuthLoginValidator : AbstractValidator<AuthLoginViewModel>
+public class AuthLoginValidator : AbstractValidator<Auth>
 {
   public AuthLoginValidator()
   {
@@ -21,7 +22,7 @@ public class AuthChangePasswordValidator : AbstractValidator<AuthChangePasswordV
   }
 }
 
-public class AuthResetPasswordValidator : AbstractValidator<AuthResetPasswordViewModel>
+public class AuthResetPasswordValidator : AbstractValidator<Auth>
 {
   public AuthResetPasswordValidator()
   {
@@ -29,7 +30,7 @@ public class AuthResetPasswordValidator : AbstractValidator<AuthResetPasswordVie
   }
 }
 
-public class AuthRegisterValidator : AbstractValidator<AuthRegisterViewModel>
+public class AuthRegisterValidator : AbstractValidator<Auth>
 {
   public AuthRegisterValidator()
   {

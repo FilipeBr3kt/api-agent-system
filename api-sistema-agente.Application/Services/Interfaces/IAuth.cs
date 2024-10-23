@@ -1,13 +1,15 @@
+using api_sistema_agente.Domain.Entities;
 using api_sistema_agente.Domain.ViewModel;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api_sistema_agente.Application.Services.Interface;
 
 public interface IAuthServices
 {
-  Task<IResult> Login(AuthLoginViewModel model, CancellationToken cancellationToken);
-  Task<IResult> ResetPassword(AuthResetPasswordViewModel model, CancellationToken token);
-  Task<IResult> ChangePassword(AuthChangePasswordViewModel model);
-  IResult RefreshToken(HttpContext httpContext);
-  Task<IResult> Register(AuthRegisterViewModel model, CancellationToken token);
+  Task<IActionResult> Login(Auth user, CancellationToken cancellationToken);
+  Task<IActionResult> ResetPassword(Auth user, CancellationToken token);
+  Task<IActionResult> ChangePassword(Auth user);
+  IActionResult RefreshToken(HttpContext httpContext);
+  Task<IActionResult> Register(Auth user, CancellationToken token);
 }
